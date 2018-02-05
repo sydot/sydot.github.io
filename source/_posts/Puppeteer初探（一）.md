@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Puppeteer实践（一）
+title: Puppeteer初探（一）
 date: 2018-01-31 14:18:07
 tags: 
     - Puppeteer
@@ -47,7 +47,7 @@ const puppeteer = require('puppeteer');
 $ node index.js
 ```
 
-![bing截图](/images/puppeteer/bing2.png)
+![bing截图](Puppeteer初探（一）/bing2.png)
 
 使用puppeteer.launch({ headless: false })进入non-headless模式（可视化调试），可以清晰的看到每一步骤的实现
 ```javascript
@@ -58,7 +58,7 @@ const browser = await puppeteer.launch({ headless: false });
 page.setViewport({ width: 1440, height: 900 });
 ```
 
-![bing截图2](/images/puppeteer/bing.png)
+![bing截图2](Puppeteer初探（一）/bing.png)
 
 ## 自动登录
 以登录[掘金](https://juejin.im/)为例，首先在src路径下创建cred.js，用来存储账号、密码（此处为测试账号）
@@ -70,10 +70,10 @@ module.exports = {
 ```
 自动输入账号、密码要通过css selector来获取对应的元素
 
-![css选择器](/images/puppeteer/selector.png)
+![css选择器](Puppeteer初探（一）/selector.png)
 
 在这里要获取到的元素包括：1、登录按钮 2、账号输入框 3、密码输入框 4、登录按钮
-<img src="/images/puppeteer/selector1.png" width="200" alt="选择器1"><img src="/images/puppeteer/selector2.png" width="200" alt="选择器2"><img src="/images/puppeteer/selector3.png" width="200" alt="选择器3"><img src="/images/puppeteer/selector4.png" width="200" alt="选择器4">
+<img src="Puppeteer初探（一）/selector1.png" width="200" alt="选择器1"><img src="Puppeteer初探（一）/selector2.png" width="200" alt="选择器2"><img src="Puppeteer初探（一）/selector3.png" width="200" alt="选择器3"><img src="Puppeteer初探（一）/selector4.png" width="200" alt="选择器4">
 
 获得的选择器如下：
 ```javascript
@@ -113,8 +113,8 @@ const BUTTON_SELECTOR = '#juejin > div.global-component-box > div.auth-modal-box
 ```
 以下是获得的效果，可以实现自动登录。
 
-![登录界面1](/images/puppeteer/login1.jpg)
-![登录界面2](/images/puppeteer/login2.png)
+![登录界面1](Puppeteer初探（一）/login1.jpg)
+![登录界面2](Puppeteer初探（一）/login2.png)
 
 ## 生成PDF
 使用上面已经登录好的账号来爬取历史最热文章的地址，根据[API文档](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagepdfoptions)，要将{ headless: false }的选项关闭。(NOTE Generating a pdf is currently only supported in Chrome headless.)
@@ -126,7 +126,7 @@ await page.waitFor(2*1000);
 ```
 获取列表页各标题的css selector
 
-![css选择器](/images/puppeteer/css.png)
+![css选择器](Puppeteer初探（一）/css.png)
 
 ```javascript
 const LINK_SELECTOR = '#juejin > div.view-container > main > div > div > ul > li > div > a > div > div.info-box > div.info-row.title-row > a';
@@ -157,7 +157,7 @@ for (let i = 0; i < list.length; i++) {
 ```
 打印成功~以下就是最终效果啦（唯一的缺点就是chrome自带的打印效果不太好）
 
-![打印效果](/images/puppeteer/print.png)
+![打印效果](Puppeteer初探（一）/print.png)
 
 完整代码如下：
 ```javascript

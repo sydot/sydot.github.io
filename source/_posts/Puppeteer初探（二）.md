@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Puppeteer实践（二）
+title: Puppeteer初探（二）
 date: 2018-01-31 16:52:56
 tags: 
     - Puppeteer
@@ -15,11 +15,11 @@ comments: true
 + 性能分析：利用chrome的timeline以帮助诊断性能问题
 
 ## 自动登录（二）
-仍然以登录https://juejin.im/为例，修改上次的代码，使用cookie实现自动登录。
-
-首先来打印一张没有设置cookie时获得的屏幕截图（使用waitUntil代替page.waitFor,详细信息可见API文档）
+仍然以登录 https://juejin.im/ 为例，修改上次的代码，使用cookie实现自动登录。
 
 <!-- more -->
+首先来打印一张没有设置cookie时获得的屏幕截图（使用waitUntil代替page.waitFor,详细信息可见API文档）
+
 ```javascript
 const puppeteer = require('puppeteer');
  
@@ -34,11 +34,11 @@ const puppeteer = require('puppeteer');
 ```
 此时得到的截图如下，为未登录界面
 
-![juejin截图](/images/puppeteer/nocookie.png)
+![juejin截图](Puppeteer初探（二）/nocookie.png)
 
 然后在正常浏览器的Devtools → Network中找到网站的cookie信息，需要的cookie一共有两个，名称分别为auth,auth.sig
 
-![浏览器response](/images/puppeteer/response.png)
+![浏览器response](Puppeteer初探（二）/response.png)
 
 在已登录状态下（用之前的代码），使用page.cookies()获取当前页面的cookie信息
 ```javascript
@@ -46,7 +46,7 @@ await page.cookies().then(res => console.log(res))
 ```
 可以看到控制台打印出所有的cookie信息，从中找到name分别为auth和auth.sig的两个cookie
 
-![打印结果](/images/puppeteer/log.jpg)
+![打印结果](Puppeteer初探（二）/log.jpg)
 
 在目录下创建cookie.js，用来存放对应的cookie信息
 ```javascript
@@ -89,14 +89,14 @@ const { cookie1, cookie2 } = require('./cookie');
 ```
 登录界面截图如下
 
-![打印结果](/images/puppeteer/withcookie.png)
+![打印结果](Puppeteer初探（二）/withcookie.png)
 
 ## 性能分析
 性能分析主要是使用浏览器的Devtools→Performance生成当前页面的性能追踪文件，然后就可以将其上传至Chrome来分析各种数据参数
 
 在这里我们利用官方文档的[诊断强制同步布局](https://developers.google.com/web/tools/chrome-devtools/rendering-tools/forced-synchronous-layouts?hl=zh-cn)这个例子来对比Puppeteer操作与真实操作，可以打开[演示](https://googlesamples.github.io/web-fundamentals/tools/chrome-devtools/rendering-tools/forcedsync.html),按照点击页面上的Start按钮→点击面板上的Record按钮→点击面板上的Stop按钮的顺序获取一段性能分析，可以在Summary窗格中看到浏览器花费的时间分布
 
-![性能分析1](/images/puppeteer/performance.jpg)
+![性能分析1](Puppeteer初探（二）/performance.jpg)
 
 在Puppeteer通过page.tracing.start()和page.tracing.stop()来获取性能追踪数据
 ```javascript
@@ -115,11 +115,11 @@ const puppeteer = require('puppeteer');
 ```
 在trace.json中可以看到记录的数据
 
-![性能分析数据](/images/puppeteer/json.jpg)
+![性能分析数据](Puppeteer初探（二）/json.jpg)
 
 最后，将trace.json通过Load profile按钮上传到chrome，可以在Summary窗格中看到两者的性能分析数据基本是一致的
 
-![性能分析2](/images/puppeteer/performance2.jpg)
+![性能分析2](Puppeteer初探（二）/performance2.jpg)
 
 感觉性能分析这块功能还很有限，期待以后有进一步完善吧
 
@@ -184,15 +184,15 @@ after(async () => {
 ```
 可以看到三个测试均可成功通过
 
-![测试成功](/images/puppeteer/test.jpg)
+![测试成功](Puppeteer初探（二）/test.jpg)
 
 欢迎页、预览页、文档页的screenshots如下
 
-![欢迎页](/images/puppeteer/welcome-page.png)
+![欢迎页](Puppeteer初探（二）/welcome-page.png)
 
-![预览页](/images/puppeteer/preview-page.png)
+![预览页](Puppeteer初探（二）/preview-page.png)
 
-![文档页](/images/puppeteer/start-page.png)
+![文档页](Puppeteer初探（二）/start-page.png)
 
 ## 参考文档
 [Puppeteer API v1.0.0-post](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md)

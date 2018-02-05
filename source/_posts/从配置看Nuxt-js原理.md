@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 从配置看Nuxt.js
+title: 从配置看Nuxt.js原理
 date: 2018-02-01 16:21:20
 tags: 
     - Nuxt-js
@@ -10,7 +10,11 @@ comments: true
 ---
 [Nuxt.js](https://zh.nuxtjs.org/guide)是一个基于Vue.js的高度集成的SSR框架，可以通过[这篇文章](https://juejin.im/entry/5a6eb67e5188257340268005)快速理解Vue SSR。Nuxt.js集成了Vue.js,Webpack和Babel，并已经做好了相关配置，基本上是开箱即用
 
+![nuxt简介](从配置看Nuxt-js原理/nuxt-js.png)
+
 [Nuxt.config.js](https://zh.nuxtjs.org/guide/configuration)是Nuxt.js的唯一配置项，所以如果需要特殊配置，只需要修改该文件来覆盖默认配置即可，包括：
+
+<!-- more -->
 + build---webpack的构建配置
     - analyze---默认false,使用[webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)分析打包文件
     - babel---对Vue组件使用[babel-preset-vue-app](https://github.com/vuejs/babel-preset-vue-app)加载和转义
@@ -21,8 +25,6 @@ comments: true
     - postcss---对css文件用[postcss-loader](http://postcss.org/)处理
     - publicPath---为项目中的所有资源指定统一基础路径为'/_nuxt/'
     - vendor---无默认,在vendor.bundle.js中添加第三方模块
-
-<!-- more -->
 + cache---默认false,使用[Iru-cache](https://github.com/isaacs/node-lru-cache)缓存组件
 + css---无默认,引入全局的CSS文件、模块、库
 + dev---默认true,用于在编码时判断是开发环境还是生产环境
@@ -54,7 +56,7 @@ comments: true
     - chokidar---无默认，在Mac OS X系统上改善Node.js监听文件的能力
     - webpack---热重载的轮询频率
 
-以下是[nuxtjs.org](https://github.com/nuxt/nuxt.js)的nuxt.config.js配置,先来看看它是怎么成功运行的
+以下是[nuxtjs.org](https://github.com/nuxt/nuxt.js)的nuxt.config.js配置,只设置了head,loading,build三项配置，先来看看它是怎么成功运行的
 ```javascript
 module.exports = {
   head: {
@@ -169,10 +171,92 @@ export default {
   }
 }
 ```
-h是Vue的render()方法中createElement的简写，是一个[通用惯例](https://github.com/vuejs/babel-plugin-transform-vue-jsx/issues/6),在页面中渲染结果为：
+h是Vue的render()方法中createElement的简写，为[通用惯例](https://github.com/vuejs/babel-plugin-transform-vue-jsx/issues/6),在页面中渲染结果为：
 ```javascript
 <div id="__nuxt">
   <div class="nuxt-progress">
   ...
 </div>
 ```
+
+## build
+build模块是webpack的构建配置，所以在执行nuxt指令时就已经配置好了，在node_modules->nuxt->lib->builder中可以看到相关的配置
+
+以extend方法为例，在builder->webpack->client.config.js/server.config.js当中可以看到对应的处理
+```javascript
+// client.config.js
+  let config = base.call(this, { name: 'client', isServer: false })
+  ...
+  if (typeof this.options.build.extend === 'function') {
+    const isDev = this.options.dev
+    const extendedConfig = this.options.build.extend.call(this, config, {
+      get dev() {
+        printWarn('dev has been deprecated in build.extend(), please use isDev')
+        return isDev
+      },
+      isDev,
+      isClient: true
+    })
+    // Only overwrite config when something is returned for backwards compatibility
+    if (extendedConfig !== undefined) {
+      config = extendedConfig
+    }
+  }
+// server.config.js
+  let config = base.call(this, { name: 'server', isServer: true })
+  ...
+  if (typeof this.options.build.extend === 'function') {
+    const isDev = this.options.dev
+    const extendedConfig = this.options.build.extend.call(this, config, {
+      get dev() {
+        printWarn('dev has been deprecated in build.extend(), please use isDev')
+        return isDev
+      },
+      isDev,
+      isServer: true
+    })
+    // Only overwrite config when something is returned for backwards compatibility
+    if (extendedConfig !== undefined) {
+      config = extendedConfig
+    }
+  }
+```
+在base.config.js当中定义了config.module.rules,并已经封装好了以下loaders
++ vue-loader
++ babel-loader
++ less-loader
++ sass-loader
++ stylus-loader
++ url-loader
++ file-loader
+
+在extend方法中扩展的eslint-loader只在出口处client.config.js/server.config.js才被加入rules列表当中,这就符合了官网所说的，[extend](https://zh.nuxtjs.org/api/configuration-build)方法会被调用两次，一次在服务端打包构建的时候，另外一次是在客户端打包构建的时候。
+
+最后，build配置项会统一在builder.js当中处理，并传递给webpack
+```javascript
+  async webpackBuild() {
+    debug('Building files...')
+    const compilersOptions = []
+
+    // Client
+    const clientConfig = clientWebpackConfig.call(this)
+    compilersOptions.push(clientConfig)
+    
+    // Server
+    let serverConfig = null
+    if (this.options.build.ssr) {
+      serverConfig = serverWebpackConfig.call(this)
+      compilersOptions.push(serverConfig)
+    }
+    ...
+    this.compilers = compilersOptions.map(compilersOption => {
+      const compiler = webpack(compilersOption)
+      ...
+      return compiler
+    })
+    ...
+  }
+```
+
+## 总结
+虽然对nuxt.config.js中各项配置处理方法各不相同，但可以看到整体的思路是一致的，都是通过写入config配置->调用nuxt指令->传入nuxt模块->处理->输出.nuxt目录->输出页面的方式处理的。这种方式的优势就在于集成度相当高，前端可以不需要自己搭建一套SSR程序，只需通过配置文件nuxt.config.js就可以管理多个程序组件之间的关系。
