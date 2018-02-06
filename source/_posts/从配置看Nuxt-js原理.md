@@ -101,8 +101,8 @@ import Meta from 'vue-meta'
 
 Vue.use(Meta, {
   keyName: 'head', // vue-meta会在app的'head'属性中寻找对应的meta标签
-  attribute: 'data-n-head', // 给所有vue-meta检测到的标签加入'data-n-head'属性
-  ssrAttribute: 'data-n-head-ssr', // 给已经经过服务器渲染的标签加入'data-n-head-ssr'属性
+  attribute: 'data-n-head', // 给所有vue-meta监听的标签加入'data-n-head'属性
+  ssrAttribute: 'data-n-head-ssr', // 给已经完成服务器渲染的标签加入'data-n-head-ssr'属性，从而使vue-meta获知
   tagIDKeyName: 'hid' // 检测所有带有'hid'属性的标签,确保他们是唯一的
 })
 ```
@@ -259,4 +259,6 @@ build模块是webpack的构建配置，所以在执行nuxt指令时就已经配�
 ```
 
 ## 总结
-虽然对nuxt.config.js中各项配置处理方法各不相同，但可以看到整体的思路是一致的，都是通过写入config配置->调用nuxt指令->传入nuxt模块->处理->输出.nuxt目录->输出页面的方式处理的。这种方式的优势就在于集成度相当高，前端可以不需要自己搭建一套SSR程序，只需通过配置文件nuxt.config.js就可以管理多个程序组件之间的关系。
+虽然对nuxt.config.js中各项配置处理方法各不相同，但可以看到整体的思路是一致的，基本上是：
+写入config配置->调用nuxt指令->传入builder模块->处理->输出.nuxt目录->输出页面
+这种方式的优势就在于集成度相当高，前端可以不需要自己搭建一套SSR程序，只需通过配置文件nuxt.config.js就可以管理多个程序组件之间的关系。
