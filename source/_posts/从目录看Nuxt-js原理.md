@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 从Nuxt目录看Nuxt-js原理
+title: 从目录看Nuxt-js原理
 date: 2018-02-05 15:30:20
 tags: 
     - Nuxt-js
@@ -10,7 +10,7 @@ comments: true
 ---
 [Nuxt.js](https://zh.nuxtjs.org/guide)是一个基于Vue.js的高度集成的SSR框架，可以通过[这篇文章](https://juejin.im/entry/5a6eb67e5188257340268005)快速理解Vue SSR。Nuxt.js集成了Vue.js,Webpack和Babel，并已经做好了相关配置，基本上是开箱即用
 
-![nuxt简介](从Nuxt目录看Nuxt-js原理/nuxt-js.png)
+![nuxt简介](从目录看Nuxt-js原理/nuxt-js.png)
 
 Nuxt的npm包（node_modules->nuxt->lib）主要包含了两部分：builder和core，分别输出{Builder, Generator}和{Nuxt, Module, Renderer, Options, Utils}方法。从下面的代码可以看出，[上篇文章](https://sydot.github.io/2018/02/01/%E4%BB%8E%E9%85%8D%E7%BD%AE%E7%9C%8BNuxt-js%E5%8E%9F%E7%90%86/)中提到的nuxt.config.js配置项就是首先被传给core中的Nuxt类，然后将生成的实例传递给Builder类，并最终输出到.nuxt目录当中的。
 
