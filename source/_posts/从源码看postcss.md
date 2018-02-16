@@ -186,10 +186,12 @@ input和parser的过程不展开写了，作用分别为：
 let css = 'a{color:black; b{z-index:2}} c{position:relative}'
 parser.root = {
     type: 'root',
+    source: { start: { line: line, column: column }, input: this.input },
+    raws: ['selector':{ value: value, raw: raw }, 'value':{ value: value, raw: raw }, 'params':{ value: value,raw: raw }],
     nodes: [{
         type: 'rule',
-        source: { start: { line: line, column: column }, input: this.input },
-        raws: ['selector':{ value: value, raw: raw }, 'value':{ value: value, raw: raw }, 'params':{ value: value, raw: raw }],
+        source,
+        raws,
         nodes:[{
             type:'rule',
             source,
@@ -392,4 +394,4 @@ postcss的源码内容并不算多，过程其实就是parse->run->stringify，�
 
 [PostCSS README.md](https://github.com/postcss/postcss)
 
-[还不会 PostCSS？你 OUT 啦！](https://www.oschina.net/translate/its-time-for-everyone-to-learn-about-postcss)
+[使用 PostCSS 进行 CSS 处理](https://www.ibm.com/developerworks/cn/web/1604-postcss-css/)
