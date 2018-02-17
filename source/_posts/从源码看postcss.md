@@ -181,28 +181,27 @@ input和parser的过程不展开写了，作用分别为：
 1. Input(css, opts)根据opts的from和map属性，返回相应的css文件内容，input.css = css.toString()
 2. Parser(input)根据input.css.valueOf()的值，对于每一个字符位置pos上的值，利用String.charCodeAt(pos)判断不同情况并解析
 
-具体的语法解析过程内容太多，以后抽空写吧,返回的结果大致是这个结构
+具体的语法解析过程内容太多，另写了一篇文章介绍，返回的结果大致是这个结构
 ```js
-let css = 'a{color:black; b{z-index:2}} c{position:relative}'
 parser.root = {
-    type: 'root',
-    source: { start: { line: line, column: column }, input: this.input },
-    raws: ['selector':{ value: value, raw: raw }, 'value':{ value: value, raw: raw }, 'params':{ value: value,raw: raw }],
+  type: 'root',
+  source: { input: this.input, start: { line: 1, column: 1 } },
+  raws: { semicolon: 'true', after: ''},
+  nodes: [{
+    parent: this.root,
+    type: 'rule',
+    source: { input: this.input, start: { line: 1, column: 1 }, end: { line: 5, column: 1 } },
+    raws: { before: '', between: ' ', semicolon: 'true', after: '\n'},
+    selector: 'h2',
     nodes: [{
-        type: 'rule',
-        source,
-        raws,
-        nodes:[{
-            type:'rule',
-            source,
-            raws,
-            nodes:[]
-        }, {
-        type: 'rule',
-        source,
-        raws,
-        nodes:[]
-    }]
+      parent: this.root.nodes[0],
+      type: 'decl',
+      source: { input: this.input, start: { line: 2, column: 5 }, end: { line: 2, column: 16} },
+      raws: { before: '\n    ', between: ': '},
+      prop: 'color',
+      value: '#333', 
+    }
+  }]
 }
 ```
 接下来返回LazyResult中，对AST树使用插件处理，得到this.result = Result(processor, root, opts)
