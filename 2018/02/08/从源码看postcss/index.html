@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://sydot.github.io/2018/02/08/从源码看postcss/index.html">
 <meta property="og:site_name" content="Shelly的博客">
 <meta property="og:description" content="PostCSS是一个允许使用JS插件转换样式的工具。这些插件可以检查（lint）你的 CSS，支持 CSS Variables 和 Mixins，编译尚未被浏览器广泛支持的先进的 CSS语法，内联图片，以及其它很多优秀的功能。 PostCSS本身只做三件事：  将CSS解析成抽象语法树(AST树) 将AST树”传递”给任意数量的插件处理 将处理完毕的AST树重新转换成字符串  以webpack的配">
-<meta property="og:updated_time" content="2018-02-16T08:04:12.967Z">
+<meta property="og:updated_time" content="2018-02-17T16:00:47.823Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="从源码看postcss">
 <meta name="twitter:description" content="PostCSS是一个允许使用JS插件转换样式的工具。这些插件可以检查（lint）你的 CSS，支持 CSS Variables 和 Mixins，编译尚未被浏览器广泛支持的先进的 CSS语法，内联图片，以及其它很多优秀的功能。 PostCSS本身只做三件事：  将CSS解析成抽象语法树(AST树) 将AST树”传递”给任意数量的插件处理 将处理完毕的AST树重新转换成字符串  以webpack的配">
@@ -183,7 +183,7 @@
 <li>Input(css, opts)根据opts的from和map属性，返回相应的css文件内容，input.css = css.toString()</li>
 <li>Parser(input)根据input.css.valueOf()的值，对于每一个字符位置pos上的值，利用String.charCodeAt(pos)判断不同情况并解析</li>
 </ol>
-<p>具体的语法解析过程内容太多，以后抽空写吧,返回的结果大致是这个结构<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> css = <span class="string">'a&#123;color:black; b&#123;z-index:2&#125;&#125; c&#123;position:relative&#125;'</span></span><br><span class="line">parser.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">start</span>: &#123; <span class="attr">line</span>: line, <span class="attr">column</span>: column &#125;, <span class="attr">input</span>: <span class="keyword">this</span>.input &#125;,</span><br><span class="line">    raws: [<span class="string">'selector'</span>:&#123; <span class="attr">value</span>: value, <span class="attr">raw</span>: raw &#125;, <span class="string">'value'</span>:&#123; <span class="attr">value</span>: value, <span class="attr">raw</span>: raw &#125;, <span class="string">'params'</span>:&#123; <span class="attr">value</span>: value,<span class="attr">raw</span>: raw &#125;],</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source,</span><br><span class="line">        raws,</span><br><span class="line">        nodes:[&#123;</span><br><span class="line">            type:<span class="string">'rule'</span>,</span><br><span class="line">            source,</span><br><span class="line">            raws,</span><br><span class="line">            nodes:[]</span><br><span class="line">        &#125;, &#123;</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source,</span><br><span class="line">        raws,</span><br><span class="line">        nodes:[]</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>具体的语法解析过程内容太多，另写了一篇文章介绍，返回的结果大致是这个结构<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">parser.root = &#123;</span><br><span class="line">  type: <span class="string">'root'</span>,</span><br><span class="line">  source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">  raws: &#123; <span class="attr">semicolon</span>: <span class="string">'true'</span>, <span class="attr">after</span>: <span class="string">''</span>&#125;,</span><br><span class="line">  nodes: [&#123;</span><br><span class="line">    parent: <span class="keyword">this</span>.root,</span><br><span class="line">    type: <span class="string">'rule'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">5</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    raws: &#123; <span class="attr">before</span>: <span class="string">''</span>, <span class="attr">between</span>: <span class="string">' '</span>, <span class="attr">semicolon</span>: <span class="string">'true'</span>, <span class="attr">after</span>: <span class="string">'\n'</span>&#125;,</span><br><span class="line">    selector: <span class="string">'h2'</span>,</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">      parent: <span class="keyword">this</span>.root.nodes[<span class="number">0</span>],</span><br><span class="line">      type: <span class="string">'decl'</span>,</span><br><span class="line">      source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">5</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">16</span>&#125; &#125;,</span><br><span class="line">      raws: &#123; <span class="attr">before</span>: <span class="string">'\n    '</span>, <span class="attr">between</span>: <span class="string">': '</span>&#125;,</span><br><span class="line">      prop: <span class="string">'color'</span>,</span><br><span class="line">      value: <span class="string">'#333'</span>, </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>接下来返回LazyResult中，对AST树使用插件处理，得到this.result = Result(processor, root, opts)<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// result.js</span></span><br><span class="line"><span class="keyword">var</span> Result = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">Result</span>(<span class="params">processor, root, opts</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.processor = processor;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.messages = [];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.opts = opts;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.css = <span class="literal">undefined</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.map = <span class="literal">undefined</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>可以看出此时的this.result.css并不是我们想要的结果，这是因为在lazyResult中对于同步和异步的插件有不同的处理方式</p>
 <ol>
@@ -295,6 +295,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2018/02/16/postcss的AST解析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          postcss的AST解析
+        
+      </div>
+    </a>
   
   
     <a href="/2018/02/05/从目录看Nuxt-js原理/" id="article-nav-older" class="article-nav-link-wrap">
@@ -436,14 +445,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">postcss</a>
               </li>
              
@@ -452,7 +453,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">AST</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">源码</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -464,11 +477,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">Webpack</a>
+                <a href="javascript:void(0)" class="js-tag color1">Vue-router</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Vue-router</a>
+                <a href="javascript:void(0)" class="js-tag color3">Webpack</a>
               </li>
             
             <div class="clearfix"></div>

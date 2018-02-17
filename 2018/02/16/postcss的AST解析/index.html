@@ -6,18 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://sydot.github.io">
-  <title>Archives | Shelly的博客</title>
+  <title>postcss的AST解析 | Shelly的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前端er">
-<meta name="keywords" content="前端,js,javascript,html5,css,vue,react">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Shelly的博客">
-<meta property="og:url" content="https://sydot.github.io/archives/index.html">
+  <meta name="description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
+<meta name="keywords" content="postcss,css,AST,源码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="postcss的AST解析">
+<meta property="og:url" content="https://sydot.github.io/2018/02/16/postcss的AST解析/index.html">
 <meta property="og:site_name" content="Shelly的博客">
-<meta property="og:description" content="前端er">
+<meta property="og:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
+<meta property="og:image" content="https://sydot.github.io/2018/02/16/postcss的AST解析/css-rule.jpg">
+<meta property="og:updated_time" content="2018-02-17T16:23:59.563Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Shelly的博客">
-<meta name="twitter:description" content="前端er">
+<meta name="twitter:title" content="postcss的AST解析">
+<meta name="twitter:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
+<meta name="twitter:image" content="https://sydot.github.io/2018/02/16/postcss的AST解析/css-rule.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Shelly的博客" type="application/atom+xml">
   
@@ -141,36 +144,72 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-postcss的AST解析" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/16/postcss的AST解析/" class="archive-article-date">
-  	<time datetime="2018-02-16T08:56:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-16</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/16/postcss的AST解析/">postcss的AST解析</a>
+    <h1 class="article-title" itemprop="name">
+      postcss的AST解析
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/02/16/postcss的AST解析/" class="archive-article-date">
+  	<time datetime="2018-02-16T08:56:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在上篇文章<a href="https://sydot.github.io/2018/02/08/%E4%BB%8E%E6%BA%90%E7%A0%81%E7%9C%8Bpostcss/">从源码看postcss</a>中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。</p>
+<p>根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象</p>
+<p><img src="/2018/02/16/postcss的AST解析/css-rule.jpg" alt="css规则"></p>
+<p>由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见<a href="http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/" target="_blank" rel="noopener">探究 CSS 解析原理</a>），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:</p>
+<a id="more"></a>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">|h2| |&#123;|</span><br><span class="line">    |color|:| |#333|;|</span><br><span class="line">    |font-size|:| |<span class="number">150</span>%|;|</span><br><span class="line">    |margin|:| |<span class="number">5</span>px| |<span class="number">0</span>| |<span class="number">10</span>px| |<span class="number">15</span>px|;|</span><br><span class="line">|&#125;|</span><br></pre></td></tr></table></figure>
+<p>用 | 划分开的区域即为parser中的token对象，postcss在词法分析阶段（tokenize.js）将一个css文件解析为token对象组成的令牌（tokens）流，在语法分析阶段（parser.js）则将token流转换成AST形式</p>
+<p>下面来看一下处理流程（完整源码见<a href="https://github.com/postcss/postcss/tree/master/lib" target="_blank" rel="noopener">官方文档</a>，已更新为es6的源码）：</p>
+<p>首先处理’h2’，其在tokenize.js中被处理为token = [‘word’, ‘h2’,1, 1, 1, 1]，下面简单用’h2’表示，其数组成员的意义依次为：’type’, ‘selector’, ‘line’, ‘column’, ‘line’, ‘next-column’</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// this.other(token);</span></span><br><span class="line">Parser.prototype.other = <span class="function"><span class="keyword">function</span> <span class="title">other</span>(<span class="params">start</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> end = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">var</span> type = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">var</span> colon = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">var</span> bracket = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">var</span> brackets = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> tokens = [];</span><br><span class="line">    <span class="keyword">var</span> token = start;</span><br><span class="line">    <span class="keyword">while</span> (token) &#123;</span><br><span class="line">        type = token[<span class="number">0</span>];</span><br><span class="line">        tokens.push(token);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (type === <span class="string">'('</span> || type === <span class="string">'['</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!bracket) bracket = token;</span><br><span class="line">            brackets.push(type === <span class="string">'('</span> ? <span class="string">')'</span> : <span class="string">']'</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (brackets.length === <span class="number">0</span>) &#123; <span class="comment">// 无brackets只需看此处循环</span></span><br><span class="line">            <span class="keyword">if</span> (type === <span class="string">';'</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (colon) &#123;</span><br><span class="line">                    <span class="keyword">this</span>.decl(tokens);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (type === <span class="string">'&#123;'</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.rule(tokens);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (type === <span class="string">'&#125;'</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.tokenizer.back(tokens.pop());</span><br><span class="line">                end = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (type === <span class="string">':'</span>) &#123;</span><br><span class="line">                colon = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (type === brackets[brackets.length - <span class="number">1</span>]) &#123;</span><br><span class="line">            brackets.pop();</span><br><span class="line">            <span class="keyword">if</span> (brackets.length === <span class="number">0</span>) bracket = <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        token = <span class="keyword">this</span>.tokenizer.nextToken();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.tokenizer.endOfFile()) end = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">if</span> (brackets.length &gt; <span class="number">0</span>) <span class="keyword">this</span>.unclosedBracket(bracket);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (end &amp;&amp; colon) &#123;</span><br><span class="line">        <span class="keyword">while</span> (tokens.length) &#123;</span><br><span class="line">            token = tokens[tokens.length - <span class="number">1</span>][<span class="number">0</span>];</span><br><span class="line">            <span class="keyword">if</span> (token !== <span class="string">'space'</span> &amp;&amp; token !== <span class="string">'comment'</span>) <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">this</span>.tokenizer.back(tokens.pop());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.decl(tokens);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.unknownWord(tokens);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以看到tokens流会继续取值，直到token = [‘{‘, ‘{‘, 1, 3]时调用this.rule(tokens)，并跳出循环<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Parser.prototype.rule = <span class="function"><span class="keyword">function</span> <span class="title">rule</span>(<span class="params">tokens</span>) </span>&#123;</span><br><span class="line">    tokens.pop(); <span class="comment">// 去掉'&#123;'</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> node = <span class="keyword">new</span> _rule2.default();<span class="comment">// node.type = 'rule'; node.nodes = [];</span></span><br><span class="line">    <span class="keyword">this</span>.init(node, tokens[<span class="number">0</span>][<span class="number">2</span>], tokens[<span class="number">0</span>][<span class="number">3</span>]); <span class="comment">// 创建一个新节点node，并记录起始位置</span></span><br><span class="line"></span><br><span class="line">    node.raws.between = <span class="keyword">this</span>.spacesAndCommentsFromEnd(tokens); <span class="comment">// node.raws.between = ' '</span></span><br><span class="line">    <span class="keyword">this</span>.raw(node, <span class="string">'selector'</span>, tokens); <span class="comment">// node.selector = 'h2'</span></span><br><span class="line">    <span class="keyword">this</span>.current = node;</span><br><span class="line">&#125;;</span><br><span class="line">Parser.prototype.init = <span class="function"><span class="keyword">function</span> <span class="title">init</span>(<span class="params">node, line, column</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 初始 this.root.type = 'root'; this.root.nodes = []; this.current = this.root;</span></span><br><span class="line">    <span class="keyword">this</span>.current.push(node);</span><br><span class="line"></span><br><span class="line">    node.source = &#123; <span class="attr">start</span>: &#123; <span class="attr">line</span>: line, <span class="attr">column</span>: column &#125;, <span class="attr">input</span>: <span class="keyword">this</span>.input &#125;;</span><br><span class="line">    node.raws.before = <span class="keyword">this</span>.spaces;<span class="comment">// 'h2'之前的空格数</span></span><br><span class="line">    <span class="keyword">this</span>.spaces = <span class="string">''</span>; <span class="comment">// 清空空格数</span></span><br><span class="line">    <span class="keyword">if</span> (node.type !== <span class="string">'comment'</span>) <span class="keyword">this</span>.semicolon = <span class="literal">false</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>注意到在init函数中有this.current.push(node)的写法，并不是bug，而是因为无论是root.js还是rule.js,都继承了来自container.js的原型方法如下↓<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Container.prototype.push = <span class="function"><span class="keyword">function</span> <span class="title">push</span>(<span class="params">child</span>) </span>&#123;</span><br><span class="line">    child.parent = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">this</span>.nodes.push(child);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>现在我们创建了一个selector为’h2’的node节点，记录在了root.nodes当中，并令this.current指向该node节点</p>
+<p>目前得到的AST树结构如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">        parent: <span class="keyword">this</span>.root,</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        raws: &#123; <span class="attr">before</span>: <span class="string">''</span>, <span class="attr">between</span>: <span class="string">' '</span>&#125;,</span><br><span class="line">        selector: <span class="string">'h2'</span>,</span><br><span class="line">        nodes: []</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>继续处理’color: #333;’，tokens流连续取值，直到token = [‘;’, ‘;’, 2, 16]时调用this.decl(tokens)，并跳出循环<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">Parser.prototype.decl = <span class="function"><span class="keyword">function</span> <span class="title">decl</span>(<span class="params">tokens</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="keyword">new</span> _declaration2.default(); <span class="comment">// node.type = 'decl'</span></span><br><span class="line">    <span class="keyword">this</span>.init(node); <span class="comment">// node.raws.before = '\n    '</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> last = tokens[tokens.length - <span class="number">1</span>];</span><br><span class="line">    <span class="comment">// 删除decl末尾的';'</span></span><br><span class="line">    <span class="keyword">if</span> (last[<span class="number">0</span>] === <span class="string">';'</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.semicolon = <span class="literal">true</span>;</span><br><span class="line">        tokens.pop();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (last[<span class="number">4</span>]) &#123;</span><br><span class="line">        node.source.end = &#123; <span class="attr">line</span>: last[<span class="number">4</span>], <span class="attr">column</span>: last[<span class="number">5</span>] &#125;;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.source.end = &#123; <span class="attr">line</span>: last[<span class="number">2</span>], <span class="attr">column</span>: last[<span class="number">3</span>] &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (tokens[<span class="number">0</span>][<span class="number">0</span>] !== <span class="string">'word'</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tokens.length === <span class="number">1</span>) <span class="keyword">this</span>.unknownWord(tokens);</span><br><span class="line">        node.raws.before += tokens.shift()[<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    node.source.start = &#123; <span class="attr">line</span>: tokens[<span class="number">0</span>][<span class="number">2</span>], <span class="attr">column</span>: tokens[<span class="number">0</span>][<span class="number">3</span>] &#125;;</span><br><span class="line"></span><br><span class="line">    node.prop = <span class="string">''</span>;</span><br><span class="line">    <span class="comment">// tokens = ['color', ':', ' ', '#333']</span></span><br><span class="line">    <span class="keyword">while</span> (tokens.length) &#123;</span><br><span class="line">        <span class="keyword">var</span> type = tokens[<span class="number">0</span>][<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">if</span> (type === <span class="string">':'</span> || type === <span class="string">'space'</span> || type === <span class="string">'comment'</span>) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        node.prop += tokens.shift()[<span class="number">1</span>]; <span class="comment">// node.prop = 'color'</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.raws.between = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> token = <span class="keyword">void</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (tokens.length) &#123;</span><br><span class="line">        token = tokens.shift();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (token[<span class="number">0</span>] === <span class="string">':'</span>) &#123;</span><br><span class="line">            node.raws.between += token[<span class="number">1</span>]; <span class="comment">// node.raws.between = ':'</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            node.raws.between += token[<span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (node.prop[<span class="number">0</span>] === <span class="string">'_'</span> || node.prop[<span class="number">0</span>] === <span class="string">'*'</span>) &#123;</span><br><span class="line">        node.raws.before += node.prop[<span class="number">0</span>];</span><br><span class="line">        node.prop = node.prop.slice(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    node.raws.between += <span class="keyword">this</span>.spacesAndCommentsFromStart(tokens); <span class="comment">// node.raws.between = ': '</span></span><br><span class="line">    <span class="keyword">this</span>.precheckMissedSemicolon(tokens);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理important情况，可以跳过</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = tokens.length - <span class="number">1</span>; i &gt; <span class="number">0</span>; i--) &#123;</span><br><span class="line">        token = tokens[i];</span><br><span class="line">        <span class="keyword">if</span> (token[<span class="number">1</span>].toLowerCase() === <span class="string">'!important'</span>) &#123;</span><br><span class="line">            node.important = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">var</span> string = <span class="keyword">this</span>.stringFrom(tokens, i);</span><br><span class="line">            string = <span class="keyword">this</span>.spacesFromEnd(tokens) + string;</span><br><span class="line">            <span class="keyword">if</span> (string !== <span class="string">' !important'</span>) node.raws.important = string;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (token[<span class="number">1</span>].toLowerCase() === <span class="string">'important'</span>) &#123;</span><br><span class="line">            <span class="keyword">var</span> cache = tokens.slice(<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">var</span> str = <span class="string">''</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">var</span> j = i; j &gt; <span class="number">0</span>; j--) &#123;</span><br><span class="line">                <span class="keyword">var</span> _type = cache[j][<span class="number">0</span>];</span><br><span class="line">                <span class="keyword">if</span> (str.trim().indexOf(<span class="string">'!'</span>) === <span class="number">0</span> &amp;&amp; _type !== <span class="string">'space'</span>) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                str = cache.pop()[<span class="number">1</span>] + str;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (str.trim().indexOf(<span class="string">'!'</span>) === <span class="number">0</span>) &#123;</span><br><span class="line">                node.important = <span class="literal">true</span>;</span><br><span class="line">                node.raws.important = str;</span><br><span class="line">                tokens = cache;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (token[<span class="number">0</span>] !== <span class="string">'space'</span> &amp;&amp; token[<span class="number">0</span>] !== <span class="string">'comment'</span>) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.raw(node, <span class="string">'value'</span>, tokens); <span class="comment">// node.value = '#333'</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (node.value.indexOf(<span class="string">':'</span>) !== <span class="number">-1</span>) <span class="keyword">this</span>.checkMissedSemicolon(tokens);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>此时的AST树结构大致如下(source.end自己数的，不一定准~)：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">        parent: <span class="keyword">this</span>.root,</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        raws: &#123; <span class="attr">before</span>: <span class="string">''</span>, <span class="attr">between</span>: <span class="string">' '</span>&#125;,</span><br><span class="line">        selector: <span class="string">'h2'</span>,</span><br><span class="line">        nodes: [&#123;</span><br><span class="line">            parent: <span class="keyword">this</span>.root.nodes[<span class="number">0</span>],</span><br><span class="line">            type: <span class="string">'decl'</span>,</span><br><span class="line">            source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">5</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">16</span>&#125; &#125;,</span><br><span class="line">            raws: &#123; <span class="attr">before</span>: <span class="string">'\n    '</span>, <span class="attr">between</span>: <span class="string">': '</span>&#125;,</span><br><span class="line">            prop: <span class="string">'color'</span>,</span><br><span class="line">            value: <span class="string">'#333'</span>, </span><br><span class="line">        &#125;]</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同理可以得到剩下两条声明对应的node节点，此时的AST树结构大致如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">        parent: <span class="keyword">this</span>.root,</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        raws: &#123; <span class="attr">before</span>: <span class="string">''</span>, <span class="attr">between</span>: <span class="string">' '</span>&#125;,</span><br><span class="line">        selector: <span class="string">'h2'</span>,</span><br><span class="line">        nodes: [&#123;</span><br><span class="line">            parent: <span class="keyword">this</span>.root.nodes[<span class="number">0</span>],</span><br><span class="line">            type: <span class="string">'decl'</span>,</span><br><span class="line">            source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">5</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">2</span>, <span class="attr">column</span>: <span class="number">16</span>&#125; &#125;,</span><br><span class="line">            raws: &#123; <span class="attr">before</span>: <span class="string">'\n    '</span>, <span class="attr">between</span>: <span class="string">': '</span>&#125;,</span><br><span class="line">            prop: <span class="string">'color'</span>,</span><br><span class="line">            value: <span class="string">'#333'</span>, </span><br><span class="line">        &#125;, &#123;</span><br><span class="line">            parent: <span class="keyword">this</span>.root.nodes[<span class="number">0</span>],</span><br><span class="line">            type: <span class="string">'decl'</span>,</span><br><span class="line">            source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">3</span>, <span class="attr">column</span>: <span class="number">5</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">3</span>, <span class="attr">column</span>: <span class="number">20</span>&#125; &#125;,</span><br><span class="line">            raws: &#123; <span class="attr">before</span>: <span class="string">'\n    '</span>, <span class="attr">between</span>: <span class="string">': '</span>&#125;,</span><br><span class="line">            prop: <span class="string">'font-size'</span>,</span><br><span class="line">            value: <span class="string">'150%'</span>, </span><br><span class="line">        &#125;, &#123;</span><br><span class="line">            parent: <span class="keyword">this</span>.root.nodes[<span class="number">0</span>],</span><br><span class="line">            type: <span class="string">'decl'</span>,</span><br><span class="line">            source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">4</span>, <span class="attr">column</span>: <span class="number">5</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">4</span>, <span class="attr">column</span>: <span class="number">28</span>&#125; &#125;,</span><br><span class="line">            raws: &#123; <span class="attr">before</span>: <span class="string">'\n    '</span>, <span class="attr">between</span>: <span class="string">': '</span>&#125;,</span><br><span class="line">            prop: <span class="string">'margin'</span>,</span><br><span class="line">            value: <span class="string">'5px 0 10px 15px'</span>,</span><br><span class="line">        &#125;]</span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后处理token = [‘}’, ‘}’, 5, 1]<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// this.end(token);</span></span><br><span class="line">Parser.prototype.end = <span class="function"><span class="keyword">function</span> <span class="title">end</span>(<span class="params">token</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.current.nodes &amp;&amp; <span class="keyword">this</span>.current.nodes.length) &#123;</span><br><span class="line">        <span class="keyword">this</span>.current.raws.semicolon = <span class="keyword">this</span>.semicolon;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.semicolon = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.current.raws.after = (<span class="keyword">this</span>.current.raws.after || <span class="string">''</span>) + <span class="keyword">this</span>.spaces;</span><br><span class="line">    <span class="keyword">this</span>.spaces = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.current.parent) &#123;</span><br><span class="line">        <span class="keyword">this</span>.current.source.end = &#123; <span class="attr">line</span>: token[<span class="number">2</span>], <span class="attr">column</span>: token[<span class="number">3</span>] &#125;;</span><br><span class="line">        <span class="keyword">this</span>.current = <span class="keyword">this</span>.current.parent; <span class="comment">// this.current = this.root</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.unexpectedClose(token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>这样就处理完了一条css规则，并且重新将this.current指向parent节点<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    nodes: [&#123;</span><br><span class="line">        parent: <span class="keyword">this</span>.root,</span><br><span class="line">        type: <span class="string">'rule'</span>,</span><br><span class="line">        source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125;, <span class="attr">end</span>: &#123; <span class="attr">line</span>: <span class="number">5</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">        raws: &#123; <span class="attr">before</span>: <span class="string">''</span>, <span class="attr">between</span>: <span class="string">' '</span>, <span class="attr">semicolon</span>: <span class="string">'true'</span>, <span class="attr">after</span>: <span class="string">'\n'</span>&#125;,</span><br><span class="line">        selector: <span class="string">'h2'</span>,</span><br><span class="line">        nodes <span class="comment">// 子节点</span></span><br><span class="line">    &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当解析完一个css文件后，this.tokenizer.endOfFile() 返回true，跳出tokens流<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// this.endFile()</span></span><br><span class="line">Parser.prototype.endFile = <span class="function"><span class="keyword">function</span> <span class="title">endFile</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.current.parent) <span class="keyword">this</span>.unclosedBlock();</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.current.nodes &amp;&amp; <span class="keyword">this</span>.current.nodes.length) &#123;</span><br><span class="line">        <span class="keyword">this</span>.current.raws.semicolon = <span class="keyword">this</span>.semicolon;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.current.raws.after = (<span class="keyword">this</span>.current.raws.after || <span class="string">''</span>) + <span class="keyword">this</span>.spaces;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>最终得到一个完整的AST树：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.root = &#123;</span><br><span class="line">    type: <span class="string">'root'</span>,</span><br><span class="line">    source: &#123; <span class="attr">input</span>: <span class="keyword">this</span>.input, <span class="attr">start</span>: &#123; <span class="attr">line</span>: <span class="number">1</span>, <span class="attr">column</span>: <span class="number">1</span> &#125; &#125;,</span><br><span class="line">    raws: &#123; <span class="attr">semicolon</span>: <span class="string">'true'</span>, <span class="attr">after</span>: <span class="string">''</span>&#125;,</span><br><span class="line">    nodes <span class="comment">// 子节点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总结一下postcss构造的AST树中的node节点的一般规律：</p>
+<ul>
+<li>必然包含type, nodes, source.input, source.start属性</li>
+<li>如果有子节点，必然包含raws.semicolon, raws.after属性</li>
+<li>如果有父节点，必然包含raws.between, raws.before, parent属性</li>
+<li>如果不是’root’节点，必然包含source.end属性</li>
+<li>‘rule’节点额外包含selector属性</li>
+<li>‘decl’节点额外包含prop, value属性</li>
+<li>‘at-rule’节点额外包含name, params属性</li>
+<li>‘comment’节点额外包含text属性</li>
+</ul>
+<p>这个例子里面考虑的情况较为简单，没有涉及到’at-rule’和’comment’等情况，也没有涉及到错误处理的情况，不过处理流程大致相同，就不多赘述了</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://yq.aliyun.com/articles/179389" target="_blank" rel="noopener">AST解析基础: 如何写一个简单的html语法分析库</a></li>
+<li><a href="https://yq.aliyun.com/articles/465202" target="_blank" rel="noopener">探索babel和babel插件是怎么工作的</a></li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -194,241 +233,122 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://sydot.github.io/2018/02/16/postcss的AST解析/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/08/从源码看postcss/" class="archive-article-date">
-  	<time datetime="2018-02-08T06:32:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-08</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/02/08/从源码看postcss/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">从源码看postcss</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/08/从源码看postcss/">从源码看postcss</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/05/从目录看Nuxt-js原理/" class="archive-article-date">
-  	<time datetime="2018-02-05T07:30:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-05</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/05/从目录看Nuxt-js原理/">从目录看Nuxt-js原理</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Nuxt-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Vue-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Vue-router</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/01/从配置看Nuxt-js原理/" class="archive-article-date">
-  	<time datetime="2018-02-01T08:21:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/01/从配置看Nuxt-js原理/">从配置看Nuxt.js原理</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Nuxt-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Vue-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Webpack</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/01/31/Puppeteer初探（二）/" class="archive-article-date">
-  	<time datetime="2018-01-31T08:52:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-31</time>
-</a>
-        </div>
-    	 
+  <div id="gitment-ctn"></div> 
+<link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<script src="//imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  id: "https://sydot.github.io/2018/02/16/postcss的AST解析/",
+  owner: 'sydot',
+  repo: 'sydot.github.io',
+  oauth: {
+    client_id: '8a76110e01d6f90d4fb4',
+    client_secret: 'a93cbba4422fce3f6041918fabd8c3cf620eed92',
+  },
+})
+gitment.render('gitment-ctn')
+</script>
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/01/31/Puppeteer初探（二）/">Puppeteer初探（二）</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Puppeteer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">爬虫</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/01/31/Puppeteer初探（一）/" class="archive-article-date">
-  	<time datetime="2018-01-31T06:18:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-31</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/01/31/Puppeteer初探（一）/">Puppeteer初探（一）</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Puppeteer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">爬虫</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -451,8 +371,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
