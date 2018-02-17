@@ -181,8 +181,9 @@ input和parser的过程不展开写了，作用分别为：
 1. Input(css, opts)根据opts的from和map属性，返回相应的css文件内容，input.css = css.toString()
 2. Parser(input)根据input.css.valueOf()的值，对于每一个字符位置pos上的值，利用String.charCodeAt(pos)判断不同情况并解析
 
-具体的语法解析过程内容太多，另写了一篇文章介绍，返回的结果大致是这个结构
+具体的语法解析过程内容太多，另写了一篇文章介绍[postcss的AST解析](https://sydot.github.io/2018/02/16/postcss%E7%9A%84AST%E8%A7%A3%E6%9E%90/)，返回的结果大致是这个结构
 ```js
+let css = "h2 {\n  color: #333\n;}"
 parser.root = {
   type: 'root',
   source: { input: this.input, start: { line: 1, column: 1 } },
@@ -197,7 +198,7 @@ parser.root = {
       parent: this.root.nodes[0],
       type: 'decl',
       source: { input: this.input, start: { line: 2, column: 5 }, end: { line: 2, column: 16} },
-      raws: { before: '\n    ', between: ': '},
+      raws: { before: '\n  ', between: ': '},
       prop: 'color',
       value: '#333', 
     }
@@ -391,6 +392,6 @@ postcss的源码内容并不算多，过程其实就是parse->run->stringify，�
 
 ## 参考文档
 
-[PostCSS README.md](https://github.com/postcss/postcss)
+[PostCSS 官方介绍](https://github.com/postcss/postcss)
 
 [使用 PostCSS 进行 CSS 处理](https://www.ibm.com/developerworks/cn/web/1604-postcss-css/)
