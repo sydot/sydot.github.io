@@ -12,9 +12,12 @@ comments: true
 
 ![nuxt简介](从配置看Nuxt-js原理/nuxt-js.png)
 
+<!-- more -->
+
+## 基本配置
+
 [Nuxt.config.js](https://zh.nuxtjs.org/guide/configuration)是Nuxt.js的唯一配置项，所以如果需要特殊配置，只需要修改该文件来覆盖默认配置即可，包括：
 
-<!-- more -->
 + build---webpack的构建配置
     - analyze---默认false,使用[webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)分析打包文件
     - babel---对Vue组件使用[babel-preset-vue-app](https://github.com/vuejs/babel-preset-vue-app)加载和转义
@@ -56,6 +59,7 @@ comments: true
     - chokidar---无默认，在Mac OS X系统上改善Node.js监听文件的能力
     - webpack---热重载的轮询频率
 
+## 示例
 以下是[nuxtjs.org](https://github.com/nuxt/nuxt.js)的nuxt.config.js配置,只设置了head,loading,build三项配置，先来看看它是怎么成功运行的
 ```javascript
 module.exports = {
@@ -86,7 +90,7 @@ module.exports = {
 }
 ```
 
-## head
+## head配置
 首先来看head配置，它用到了[vue-meta](https://github.com/declandewet/vue-meta#recognized-metainfo-properties)来最终转换成这样的结果：
 ```javascript
 <meta data-n-head="true" charset="utf-8">
@@ -125,7 +129,7 @@ export default {
 ```
 显然，位于nuxt.config.js中的head配置被写入App.js，存储在了app根组件的'head'属性当中，最终渲染时被vue-meta转成meta头
 
-## loading
+## loading配置
 同理，loading配置也是被注入到了components/nuxt-loading.vue的data当中，并被渲染到了App.js的根dom元素下
 ```javascript
 // components/nuxt-loading.vue
@@ -179,7 +183,7 @@ h是Vue的render()方法中createElement的简写，为[通用惯例](https://gi
 </div>
 ```
 
-## build
+## build配置
 build模块是webpack的构建配置，所以在执行nuxt指令时就已经配置好了，在node_modules->nuxt->lib->builder中可以看到相关的配置
 
 以extend方法为例，在builder->webpack->client.config.js/server.config.js当中可以看到对应的处理

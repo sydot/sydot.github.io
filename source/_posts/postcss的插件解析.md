@@ -174,8 +174,146 @@ this.plugin = {
 
 ## postcss的公共API
 
-根据约定，postcss插件应该不依赖于任何非公共的属性和方法，而是使用[API文档](http://api.postcss.org/)中的公共API对AST树进行改动
+根据约定，postcss插件应该不依赖于任何非公共的属性和方法，而是使用[API文档](http://api.postcss.org/)中的公共API对AST树进行改动，这些规则定义在postcss源码的container.js当中
 
+例如，在prefixes.processor.add(css, result)当中就用到了postcss当中的walkAtRules函数，对AST树中的所有type类型为'atrule'的规则进行遍历，并逐一处理。
 
+```js
+// 停止遍历的条件是return false，不是undefined
+css.walkAtRules(function (rule) {
+  if (rule.name === 'keyframes') {
+    if (!_this.disabled(rule, result)) {
+      return keyframes && keyframes.process(rule);
+    }
+  } else if (rule.name === 'viewport') {
+    if (!_this.disabled(rule, result)) {
+      return viewport && viewport.process(rule);
+    }
+  } else if (rule.name === 'supports') {
+    if (_this.prefixes.options.supports !== false && !_this.disabled(rule, result)) {
+      return supports.process(rule);
+    }
+  } else if (rule.name === 'media' && rule.params.indexOf('-resolution') !== -1) {
+    if (!_this.disabled(rule, result)) {
+      return resolution && resolution.process(rule);
+    }
+  }
+  return undefined;
+});
+```
 
+在文章[postcss的AST解析](https://sydot.github.io/2018/02/16/postcss%E7%9A%84AST%E8%A7%A3%E6%9E%90/)中总结了AST树中的type为'atrule'的node节点的一般规律，即'atrule'节点额外包含name, params属性。因而我们能在callback中判断其具体类型
 
+下面来看一下postcss源码中是怎么获取每一个'atrule'节点的
+
+```js
+// container.js
+Container.prototype.walkAtRules = function walkAtRules(name, callback) {
+  if (!callback) {
+    callback = name;
+    return this.walk(function (child, i) {
+      // child即为一个node节点
+      if (child.type === 'atrule') {
+        return callback(child, i);
+      }
+    });
+  } else if (name instanceof RegExp) {
+    return this.walk(function (child, i) {
+      if (child.type === 'atrule' && name.test(child.name)) {
+        return callback(child, i);
+      }
+    });
+  } else {
+    return this.walk(function (child, i) {
+      if (child.type === 'atrule' && child.name === name) {
+        return callback(child, i);
+      }
+    });
+  }
+};
+
+Container.prototype.walk = function walk(callback) {
+  return this.each(function (child, i) {
+    var result = callback(child, i);
+    // BFS 遍历所有AST的子节点
+    if (result !== false && child.walk) {
+      result = child.walk(callback);
+    }
+    return result;
+  });
+};
+
+Container.prototype.each = function each(callback) {
+  if (!this.lastEach) this.lastEach = 0;
+  if (!this.indexes) this.indexes = {};
+
+  this.lastEach += 1;
+  var id = this.lastEach;
+  this.indexes[id] = 0;
+
+  if (!this.nodes) return undefined;
+
+  var index = void 0,
+      result = void 0;
+  // 遍历一个nodes节点中的所有子节点
+  while (this.indexes[id] < this.nodes.length) {
+    index = this.indexes[id];
+    result = callback(this.nodes[index], index);
+    if (result === false) break;
+
+    this.indexes[id] += 1;
+  }
+
+  delete this.indexes[id];
+
+  return result;
+};
+```
+postcss提供的walkAtRules,walkDecls,walkRules函数分别对应着AST树中type类型为'atrule','decl','rule'的所有非根节点，为postcss插件对于AST树的访问提供了极大的便利
+
+## 插件处理
+
+上述的walkAtRules函数最终会调用at-rule.js中的process函数来处理匹配到的'atrule'节点
+
+```js
+AtRule.prototype.process = function process(node) {
+  var parent = this.parentPrefix(node);
+  // this.prefixes就是要添加的前缀的集合
+  for (var _iterator = this.prefixes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+    var _ref;
+
+    if (_isArray) {
+      if (_i >= _iterator.length) break;
+      _ref = _iterator[_i++];
+    } else {
+      _i = _iterator.next();
+      if (_i.done) break;
+      _ref = _i.value;
+    }
+
+    var prefix = _ref;
+    // 逐一添加前缀
+    if (!parent || parent === prefix) {
+      this.add(node, prefix);
+    }
+  }
+};
+
+AtRule.prototype.add = function add(rule, prefix) {
+  var prefixed = prefix + rule.name;
+
+  var already = rule.parent.some(function (i) {
+    return i.name === prefixed && i.params === rule.params;
+  });
+  if (already) {
+    return undefined;
+  }
+  // cloned即为添加了前缀的节点
+  var cloned = this.clone(rule, { name: prefixed });
+  // 在该节点之前添加clone节点
+  return rule.parent.insertBefore(rule, cloned);
+};
+```
+
+## 总结
+梳理一下代码流程，首先是在postcss中调用run函数，然后在插件的plugin函数中处理AST树，通过postcss的公共API获取node节点信息，最后插件返回处理完的AST树~

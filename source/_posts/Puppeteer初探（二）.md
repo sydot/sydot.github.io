@@ -14,10 +14,11 @@ comments: true
 + 自动化测试：自动表单提交，UI测试，键盘输入等
 + 性能分析：利用chrome的timeline以帮助诊断性能问题
 
+<!-- more -->
+
 ## 自动登录（二）
 仍然以登录 https://juejin.im/ 为例，修改上次的代码，使用cookie实现自动登录。
 
-<!-- more -->
 首先来打印一张没有设置cookie时获得的屏幕截图（使用waitUntil代替page.waitFor,详细信息可见API文档）
 
 ```javascript

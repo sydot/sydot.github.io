@@ -14,6 +14,8 @@ comments: true
 + 自动化测试：自动表单提交，UI测试，键盘输入等
 + 性能分析：利用chrome的timeline以帮助诊断性能问题
 
+<!-- more -->
+
 ## 准备工作
 创建一个新文件夹，并安装puppeteer（要求Node版本为6.4.0以上，使用async/await语法要求Node版本为7.6.0以上）
 ``` bash
@@ -23,7 +25,6 @@ $ npm i --save puppeteer
 ## 生成截图
 先从最简单的screenshots开始，由于puppeteer要求必须有相应的匹配路径，所以必须先创建相应的文件夹
 
-<!-- more -->
 ```bash
 $ mkdir screenshots
 $ mkdir src

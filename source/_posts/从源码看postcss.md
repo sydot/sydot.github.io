@@ -15,9 +15,11 @@ PostCSS本身只做三件事：
   2. 将AST树"传递"给任意数量的插件处理
   3. 将处理完毕的AST树重新转换成字符串
 
+<!-- more -->
+
+## 基本配置
 以webpack的配置为例，在 webpack.config.js 里使用 [postcss-loader](https://github.com/postcss/postcss-loader) :
 
-<!-- more -->
 ```js
 module.exports = {
   module: {
@@ -54,6 +56,8 @@ module.exports = {
 }
 ```
 这样，postcss就会以解析.css后缀的文件->传递给precss、autoprefixer处理->返回处理完毕的.css文件这样的顺序来工作了
+
+## postcss-loader的处理流程
 
 具体来看node_modules->postcss-loader->lib->index.js的处理
 ```js
@@ -104,6 +108,9 @@ fs.readFile('src/app.css', (err, css) => {
         });
 });
 ```
+
+## postcss的处理流程
+
 接下来在node_modules->postcss->lib中看下具体是怎么处理的(ES5的源码，并且修改过很多次了，看起来还是有些繁琐的)
 ```js
 // postcss.js

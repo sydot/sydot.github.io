@@ -15,9 +15,11 @@ comments: true
 
 ![css规则](postcss的AST解析/css-rule.jpg)
 
-由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见[探究 CSS 解析原理](http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/)），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:
-
 <!-- more -->
+
+## postcss的解析
+
+由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见[探究 CSS 解析原理](http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/)），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:
 
 ```js
 |h2| |{|
@@ -358,10 +360,10 @@ this.root = {
 + 如果不是'root'节点，必然包含source.end属性
 + 'rule'节点额外包含selector属性
 + 'decl'节点额外包含prop, value属性
-+ 'at-rule'节点额外包含name, params属性
++ 'atrule'节点额外包含name, params属性
 + 'comment'节点额外包含text属性
 
-这个例子里面考虑的情况较为简单，没有涉及到'at-rule'和'comment'等情况，也没有涉及到错误处理的情况，不过处理流程大致相同，就不多赘述了
+这个例子里面考虑的情况较为简单，没有涉及到'atrule'和'comment'等情况，也没有涉及到错误处理的情况，不过处理流程大致相同，就不多赘述了
 
 ## 参考文档
 + [AST解析基础: 如何写一个简单的html语法分析库](https://yq.aliyun.com/articles/179389)

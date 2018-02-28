@@ -12,9 +12,11 @@ comments: true
 
 ![nuxt简介](从目录看Nuxt-js原理/nuxt-js.png)
 
+<!-- more -->
+
+## .Nuxt目录结构
 Nuxt的npm包（node_modules->nuxt->lib）主要包含了两部分：builder和core，分别输出{Builder, Generator}和{Nuxt, Module, Renderer, Options, Utils}方法。从下面的代码可以看出，[上篇文章](https://sydot.github.io/2018/02/01/%E4%BB%8E%E9%85%8D%E7%BD%AE%E7%9C%8BNuxt-js%E5%8E%9F%E7%90%86/)中提到的nuxt.config.js配置项就是首先被传给core中的Nuxt类，然后将生成的实例传递给Builder类，并最终输出到.nuxt目录当中的。
 
-<!-- more -->
 ```javascript
 const { Nuxt, Builder } = require('nuxt')
 
@@ -29,6 +31,7 @@ if (config.dev) {
 ```
 
 Nuxt的[目录结构](https://zh.nuxtjs.org/guide/directory-structure)如下：
+
 + assets---用于组织未编译的静态资源如 LESS、SASS 或 JavaScript，会被Webpack编译处理
 + components---用于组织应用的Vue.js组件，不会被Nuxt扩展
 + layouts---用于组织应用的布局组件，在布局文件中添加 <nuxt/> 组件用于显示页面的主体内容。
@@ -40,7 +43,7 @@ Nuxt的[目录结构](https://zh.nuxtjs.org/guide/directory-structure)如下：
 
 其中assets,components,middleware,plugins,static,store均不是项目运行必要的，只有layouts,pages是必要的。在这里分析一下pages生成[路由](https://zh.nuxtjs.org/guide/routing#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1)的过程
 
-## pages
+## pages处理流程
 页面组件实际上是Vue组件，只不过Nuxt.js为这些组件添加了一些特殊的[配置项](https://zh.nuxtjs.org/api)。以[官网示例](https://zh.nuxtjs.org/guide/routing#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1)中的动态路由为例，对于如下的目录结构
 ```
 pages/
