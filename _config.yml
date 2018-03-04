@@ -93,7 +93,7 @@ exclude_generator:
 
 deploy:
   type: git
-  repo: https://github.com/sydot/sydot.github.io.git
+  repo: git@github.com:sydot/sydot.github.io.git
   branch: master
 
 sitemap:
