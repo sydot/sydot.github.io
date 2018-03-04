@@ -143,6 +143,196 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Autoprefixer解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/04/Autoprefixer解析/">Autoprefixer解析</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/04/Autoprefixer解析/" class="archive-article-date">
+  	<time datetime="2018-03-04T05:51:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在上篇文章<a href="https://sydot.github.io/2018/02/25/postcss%E7%9A%84%E6%8F%92%E4%BB%B6%E8%A7%A3%E6%9E%90/">postcss的插件解析</a>中以Autoprefixer为例，介绍了postcss对于插件的处理流程。这次主要分析Autoprefixer的工作原理。</p>
+<p><a href="https://github.com/postcss/autoprefixer" target="_blank" rel="noopener">Autoprefixer</a>是一个CSS文件的后处理程序，使用<a href="https://caniuse.com/" target="_blank" rel="noopener">Can I Use</a>的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下示例代码：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-pseudo">:fullscreen</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码会被自动编译为：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-pseudo">:-webkit-full-screen</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: -webkit-box;</span><br><span class="line">    <span class="attribute">display</span>: flex</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">:-moz-full-screen</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">:-ms-fullscreen</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: -ms-flexbox;</span><br><span class="line">    <span class="attribute">display</span>: flex</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">:fullscreen</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: -webkit-box;</span><br><span class="line">    <span class="attribute">display</span>: -ms-flexbox;</span><br><span class="line">    <span class="attribute">display</span>: flex</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到Autoprefixer为了兼容各浏览器所做的工作：给选择器（例如<code>:fullscreen</code>和<code>::selector</code>）、属性（例如<code>flex</code>）、函数（例如<code>calc()</code>）以及@规则（例如<code>@supports</code>和<code>@keyframes</code>）等加上对应的前缀，并插入到当前节点之前。此外，Autoprefixer还负责清除不必要的浏览器前缀等工作。</p>
+        
+          <a class="article-more-a" href="/2018/03/04/Autoprefixer解析/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">autoprefixer</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">plugin</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/04/Autoprefixer解析/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-postcss的插件解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/02/25/postcss的插件解析/">postcss的插件解析</a>
+    </h1>
+  
+
+        
+        <a href="/2018/02/25/postcss的插件解析/" class="archive-article-date">
+  	<time datetime="2018-02-25T14:00:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>postcss对于其插件的解释是这样的：postcss插件是一个从postcss parser中接收并转换CSS AST树的函数。在postcss源码中有专门针对postcss插件的API文档（docs-&gt;guidelines-&gt;plugin.md）。下面以postcss中最流行的插件Autoprefixer为例，讨论一下postcss对于插件的处理流程。</p>
+<p><a href="https://github.com/postcss/autoprefixer" target="_blank" rel="noopener">Autoprefixer</a>是一个CSS文件的后处理程序，使用<a href="https://caniuse.com/" target="_blank" rel="noopener">Can I Use</a>的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下官网的示例：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码会被自动编译为：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">a</span> &#123;</span><br><span class="line">    <span class="attribute">display</span>: -webkit-box;</span><br><span class="line">    <span class="attribute">display</span>: -webkit-flex;</span><br><span class="line">    <span class="attribute">display</span>: -ms-flexbox;</span><br><span class="line">    <span class="attribute">display</span>: flex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>显然，这种方案比起在预处理器中混入兼容属性的方案更为简洁明了，只需在打包工具下引入对应的插件即可。</p>
+        
+          <a class="article-more-a" href="/2018/02/25/postcss的插件解析/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">autoprefixer</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">plugin</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/02/25/postcss的插件解析/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-postcss的AST解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -166,7 +356,6 @@
         <p>在上篇文章<a href="https://sydot.github.io/2018/02/08/%E4%BB%8E%E6%BA%90%E7%A0%81%E7%9C%8Bpostcss/">从源码看postcss</a>中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。</p>
 <p>根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象</p>
 <p><img src="/2018/02/16/postcss的AST解析/css-rule.jpg" alt="css规则"></p>
-<p>由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见<a href="http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/" target="_blank" rel="noopener">探究 CSS 解析原理</a>），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:</p>
         
           <a class="article-more-a" href="/2018/02/16/postcss的AST解析/#more">more >></a>
         
@@ -182,19 +371,19 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">AST</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">AST</a>
         		</li>
       		
 		</ul>
@@ -261,7 +450,6 @@
 <li>将AST树”传递”给任意数量的插件处理</li>
 <li>将处理完毕的AST树重新转换成字符串</li>
 </ol>
-<p>以webpack的配置为例，在 webpack.config.js 里使用 <a href="https://github.com/postcss/postcss-loader" target="_blank" rel="noopener">postcss-loader</a> :</p>
         
           <a class="article-more-a" href="/2018/02/08/从源码看postcss/#more">more >></a>
         
@@ -277,15 +465,15 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
         		</li>
       		
 		</ul>
@@ -347,7 +535,6 @@
       
         <p><a href="https://zh.nuxtjs.org/guide" target="_blank" rel="noopener">Nuxt.js</a>是一个基于Vue.js的高度集成的SSR框架，可以通过<a href="https://juejin.im/entry/5a6eb67e5188257340268005" target="_blank" rel="noopener">这篇文章</a>快速理解Vue SSR。Nuxt.js集成了Vue.js,Webpack和Babel，并已经做好了相关配置，基本上是开箱即用</p>
 <p><img src="/2018/02/05/从目录看Nuxt-js原理/nuxt-js.png" alt="nuxt简介"></p>
-<p>Nuxt的npm包（node_modules-&gt;nuxt-&gt;lib）主要包含了两部分：builder和core，分别输出{Builder, Generator}和{Nuxt, Module, Renderer, Options, Utils}方法。从下面的代码可以看出，<a href="https://sydot.github.io/2018/02/01/%E4%BB%8E%E9%85%8D%E7%BD%AE%E7%9C%8BNuxt-js%E5%8E%9F%E7%90%86/">上篇文章</a>中提到的nuxt.config.js配置项就是首先被传给core中的Nuxt类，然后将生成的实例传递给Builder类，并最终输出到.nuxt目录当中的。</p>
         
           <a class="article-more-a" href="/2018/02/05/从目录看Nuxt-js原理/#more">more >></a>
         
@@ -411,267 +598,10 @@
 
 
   
-    <article id="post-从配置看Nuxt-js原理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/02/01/从配置看Nuxt-js原理/">从配置看Nuxt.js原理</a>
-    </h1>
-  
-
-        
-        <a href="/2018/02/01/从配置看Nuxt-js原理/" class="archive-article-date">
-  	<time datetime="2018-02-01T08:21:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-01</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a href="https://zh.nuxtjs.org/guide" target="_blank" rel="noopener">Nuxt.js</a>是一个基于Vue.js的高度集成的SSR框架，可以通过<a href="https://juejin.im/entry/5a6eb67e5188257340268005" target="_blank" rel="noopener">这篇文章</a>快速理解Vue SSR。Nuxt.js集成了Vue.js,Webpack和Babel，并已经做好了相关配置，基本上是开箱即用</p>
-<p><img src="/2018/02/01/从配置看Nuxt-js原理/nuxt-js.png" alt="nuxt简介"></p>
-<p><a href="https://zh.nuxtjs.org/guide/configuration" target="_blank" rel="noopener">Nuxt.config.js</a>是Nuxt.js的唯一配置项，所以如果需要特殊配置，只需要修改该文件来覆盖默认配置即可，包括：</p>
-        
-          <a class="article-more-a" href="/2018/02/01/从配置看Nuxt-js原理/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Nuxt-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Vue-js</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Webpack</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/02/01/从配置看Nuxt-js原理/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Puppeteer初探（二）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/31/Puppeteer初探（二）/">Puppeteer初探（二）</a>
-    </h1>
-  
-
-        
-        <a href="/2018/01/31/Puppeteer初探（二）/" class="archive-article-date">
-  	<time datetime="2018-01-31T08:52:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a href="https://github.com/GoogleChrome/puppeteer" target="_blank" rel="noopener">Puppeteer</a>是一个Node库，通过<a href="https://github.com/ChromeDevTools/awesome-chrome-devtools#readme" target="_blank" rel="noopener">DevTools Protocol</a>提供高级API来控制<a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank" rel="noopener">Headless Chrome</a>，大部分在浏览器中手动完成的事情都可以通过Puppeteer完成，以下是几个例子：</p>
-<ul>
-<li>打印页面：可以生成页面的screenshots和PDF</li>
-<li>高级爬虫：可以抓取SPA页面和预渲染(SSR)页面</li>
-<li>自动化测试：自动表单提交，UI测试，键盘输入等</li>
-<li>性能分析：利用chrome的timeline以帮助诊断性能问题</li>
-</ul>
-<h2 id="自动登录（二）"><a href="#自动登录（二）" class="headerlink" title="自动登录（二）"></a>自动登录（二）</h2><p>仍然以登录 <a href="https://juejin.im/" target="_blank" rel="noopener">https://juejin.im/</a> 为例，修改上次的代码，使用cookie实现自动登录。</p>
-        
-          <a class="article-more-a" href="/2018/01/31/Puppeteer初探（二）/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Puppeteer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">爬虫</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/01/31/Puppeteer初探（二）/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Puppeteer初探（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/31/Puppeteer初探（一）/">Puppeteer初探（一）</a>
-    </h1>
-  
-
-        
-        <a href="/2018/01/31/Puppeteer初探（一）/" class="archive-article-date">
-  	<time datetime="2018-01-31T06:18:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a href="https://github.com/GoogleChrome/puppeteer" target="_blank" rel="noopener">Puppeteer</a>是一个Node库，通过<a href="https://github.com/ChromeDevTools/awesome-chrome-devtools#readme" target="_blank" rel="noopener">DevTools Protocol</a>提供高级API来控制<a href="https://developers.google.com/web/updates/2017/04/headless-chrome" target="_blank" rel="noopener">Headless Chrome</a>，大部分在浏览器中手动完成的事情都可以通过Puppeteer完成，以下是几个例子：</p>
-<ul>
-<li>打印页面：可以生成页面的screenshots和PDF</li>
-<li>高级爬虫：可以抓取SPA页面和预渲染(SSR)页面</li>
-<li>自动化测试：自动表单提交，UI测试，键盘输入等</li>
-<li>性能分析：利用chrome的timeline以帮助诊断性能问题</li>
-</ul>
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>创建一个新文件夹，并安装puppeteer（要求Node版本为6.4.0以上，使用async/await语法要求Node版本为7.6.0以上）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ npm init</span><br><span class="line">$ npm i --save puppeteer</span><br></pre></td></tr></table></figure></p>
-<h2 id="生成截图"><a href="#生成截图" class="headerlink" title="生成截图"></a>生成截图</h2><p>先从最简单的screenshots开始，由于puppeteer要求必须有相应的匹配路径，所以必须先创建相应的文件夹</p>
-        
-          <a class="article-more-a" href="/2018/01/31/Puppeteer初探（一）/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Puppeteer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">爬虫</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/01/31/Puppeteer初探（一）/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -761,19 +691,35 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">postcss</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">css</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">AST</a>
+                <a href="javascript:void(0)" class="js-tag color3">autoprefixer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">plugin</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">源码</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">postcss</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">AST</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -790,14 +736,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">Webpack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
               </li>
             
             <div class="clearfix"></div>

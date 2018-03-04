@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="https://sydot.github.io">
   <title>postcss的AST解析 | Shelly的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
-<meta name="keywords" content="postcss,css,AST,源码">
+  <meta name="description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象">
+<meta name="keywords" content="css,源码,postcss,AST">
 <meta property="og:type" content="article">
 <meta property="og:title" content="postcss的AST解析">
 <meta property="og:url" content="https://sydot.github.io/2018/02/16/postcss的AST解析/index.html">
 <meta property="og:site_name" content="Shelly的博客">
-<meta property="og:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
+<meta property="og:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象">
 <meta property="og:image" content="https://sydot.github.io/2018/02/16/postcss的AST解析/css-rule.jpg">
-<meta property="og:updated_time" content="2018-02-17T16:23:59.563Z">
+<meta property="og:updated_time" content="2018-03-04T06:04:33.786Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="postcss的AST解析">
-<meta name="twitter:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象  由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见探究 CSS 解析原理），因而只需简单切出特殊字符以">
+<meta name="twitter:description" content="在上篇文章从源码看postcss中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象">
 <meta name="twitter:image" content="https://sydot.github.io/2018/02/16/postcss的AST解析/css-rule.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Shelly的博客" type="application/atom+xml">
@@ -167,9 +167,9 @@
         <p>在上篇文章<a href="https://sydot.github.io/2018/02/08/%E4%BB%8E%E6%BA%90%E7%A0%81%E7%9C%8Bpostcss/">从源码看postcss</a>中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。</p>
 <p>根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象</p>
 <p><img src="/2018/02/16/postcss的AST解析/css-rule.jpg" alt="css规则"></p>
-<p>由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见<a href="http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/" target="_blank" rel="noopener">探究 CSS 解析原理</a>），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:</p>
 <a id="more"></a>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">|h2| |&#123;|</span><br><span class="line">    |color|:| |#333|;|</span><br><span class="line">    |font-size|:| |<span class="number">150</span>%|;|</span><br><span class="line">    |margin|:| |<span class="number">5</span>px| |<span class="number">0</span>| |<span class="number">10</span>px| |<span class="number">15</span>px|;|</span><br><span class="line">|&#125;|</span><br></pre></td></tr></table></figure>
+<h2 id="postcss的解析"><a href="#postcss的解析" class="headerlink" title="postcss的解析"></a>postcss的解析</h2><p>由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见<a href="http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/" target="_blank" rel="noopener">探究 CSS 解析原理</a>），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">|h2| |&#123;|</span><br><span class="line">    |color|:| |#333|;|</span><br><span class="line">    |font-size|:| |150%|;|</span><br><span class="line">    |margin|:| |5px| |0| |10px| |15px|;|</span><br><span class="line">|&#125;|</span><br></pre></td></tr></table></figure>
 <p>用 | 划分开的区域即为parser中的token对象，postcss在词法分析阶段（tokenize.js）将一个css文件解析为token对象组成的令牌（tokens）流，在语法分析阶段（parser.js）则将token流转换成AST形式</p>
 <p>下面来看一下处理流程（完整源码见<a href="https://github.com/postcss/postcss/tree/master/lib" target="_blank" rel="noopener">官方文档</a>，已更新为es6的源码）：</p>
 <p>首先处理’h2’，其在tokenize.js中被处理为token = [‘word’, ‘h2’,1, 1, 1, 1]，下面简单用’h2’表示，其数组成员的意义依次为：’type’, ‘selector’, ‘line’, ‘column’, ‘line’, ‘next-column’</p>
@@ -194,10 +194,10 @@
 <li>如果不是’root’节点，必然包含source.end属性</li>
 <li>‘rule’节点额外包含selector属性</li>
 <li>‘decl’节点额外包含prop, value属性</li>
-<li>‘at-rule’节点额外包含name, params属性</li>
+<li>‘atrule’节点额外包含name, params属性</li>
 <li>‘comment’节点额外包含text属性</li>
 </ul>
-<p>这个例子里面考虑的情况较为简单，没有涉及到’at-rule’和’comment’等情况，也没有涉及到错误处理的情况，不过处理流程大致相同，就不多赘述了</p>
+<p>这个例子里面考虑的情况较为简单，没有涉及到’atrule’和’comment’等情况，也没有涉及到错误处理的情况，不过处理流程大致相同，就不多赘述了</p>
 <h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
 <li><a href="https://yq.aliyun.com/articles/179389" target="_blank" rel="noopener">AST解析基础: 如何写一个简单的html语法分析库</a></li>
 <li><a href="https://yq.aliyun.com/articles/465202" target="_blank" rel="noopener">探索babel和babel插件是怎么工作的</a></li>
@@ -215,19 +215,19 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">AST</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">AST</a>
         		</li>
       		
 		</ul>
@@ -296,6 +296,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2018/02/25/postcss的插件解析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          postcss的插件解析
+        
+      </div>
+    </a>
   
   
     <a href="/2018/02/08/从源码看postcss/" id="article-nav-older" class="article-nav-link-wrap">
@@ -437,19 +446,35 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">postcss</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">css</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">AST</a>
+                <a href="javascript:void(0)" class="js-tag color3">autoprefixer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">plugin</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">源码</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">postcss</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">AST</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -466,14 +491,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">Webpack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
               </li>
             
             <div class="clearfix"></div>
