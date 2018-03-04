@@ -15,7 +15,7 @@ postcss对于其插件的解释是这样的：postcss插件是一个从postcss p
 
 [Autoprefixer](https://github.com/postcss/autoprefixer)是一个CSS文件的后处理程序，使用[Can I Use](https://caniuse.com/)的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下官网的示例：
 
-```js
+```css
 a {
     display: flex;
 }
@@ -23,7 +23,7 @@ a {
 
 以上代码会被自动编译为：
 
-```js
+```css
 a {
     display: -webkit-box;
     display: -webkit-flex;

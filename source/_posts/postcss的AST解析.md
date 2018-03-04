@@ -21,7 +21,7 @@ comments: true
 
 由于postcss并不是CSS执行器，不需要像浏览器那样解析CSS（具体可见[探究 CSS 解析原理](http://jartto.wang/2017/11/13/Exploring-the-principle-of-CSS-parsing/)），因而只需简单切出特殊字符以及space,brackets,string,at-word,word,comment等的代码段即可，例如上述示例代码可进行如下切分:
 
-```js
+```css
 |h2| |{|
     |color|:| |#333|;|
     |font-size|:| |150%|;|
