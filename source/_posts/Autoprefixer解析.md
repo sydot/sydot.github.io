@@ -77,11 +77,12 @@ plugin = function(css, result) {
 };
 ```
 
-显然，这里的loadPrefixes函数创建了一个包含所有需要的浏览器前缀列表，以及在processor属性中用于加工AST树的各类回调函数的prefixes对象，随后调用该对象中的remove、add等函数对传入的css AST树进行处理。
+显然，这里的loadPrefixes函数创建了一个包含所有需要的浏览器前缀列表，以及在processor属性中用于加工AST树的各类回调函数的prefixes对象，随后调用该对象中的remove、add等函数对传入的css AST树进行处理:
 
 ```js
 loadPrefixes = function(opts) {
   var browsers, key, stats;
+  // 浏览器兼容的配置
   stats = options.stats;
   // 根据browserslist(https://github.com/ai/browserslist)获取的需要兼容的浏览器列表
   browsers = new Browsers(module.exports.data.browsers, reqs, opts, stats);
