@@ -9,6 +9,7 @@ tags:
     - 源码
 comments: true
 ---
+
 在上篇文章[从源码看postcss](https://sydot.github.io/2018/02/08/%E4%BB%8E%E6%BA%90%E7%A0%81%E7%9C%8Bpostcss/)中提到了postcss中parser的作用，即对CSS进行AST解析，这回具体探讨下解析的过程。
 
 根据CSS规则，可将一个CSS对象解析为Element,Property,Colon,Value,Semicolon等符合CSS语法的对象

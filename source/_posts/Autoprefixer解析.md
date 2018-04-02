@@ -9,6 +9,7 @@ tags:
     - 源码
 comments: true
 ---
+
 在上篇文章[postcss的插件解析](https://sydot.github.io/2018/02/25/postcss%E7%9A%84%E6%8F%92%E4%BB%B6%E8%A7%A3%E6%9E%90/)中以Autoprefixer为例，介绍了postcss对于插件的处理流程。这次主要分析Autoprefixer的工作原理。
 
 [Autoprefixer](https://github.com/postcss/autoprefixer)是一个CSS文件的后处理程序，使用[Can I Use](https://caniuse.com/)的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下示例代码：
