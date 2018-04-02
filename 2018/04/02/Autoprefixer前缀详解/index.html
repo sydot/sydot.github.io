@@ -6,18 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://sydot.github.io">
-  <title>Tag: 源码 | Shelly的博客</title>
+  <title>Autoprefixer前缀详解 | Shelly的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前端er">
-<meta name="keywords" content="前端,js,javascript,html5,css,vue,react">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Shelly的博客">
-<meta property="og:url" content="https://sydot.github.io/tags/源码/index.html">
+  <meta name="description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
+<meta name="keywords" content="css,autoprefixer,源码,book">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Autoprefixer前缀详解">
+<meta property="og:url" content="https://sydot.github.io/2018/04/02/Autoprefixer前缀详解/index.html">
 <meta property="og:site_name" content="Shelly的博客">
-<meta property="og:description" content="前端er">
+<meta property="og:description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
+<meta property="og:updated_time" content="2018-04-02T13:16:35.562Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Shelly的博客">
-<meta name="twitter:description" content="前端er">
+<meta name="twitter:title" content="Autoprefixer前缀详解">
+<meta name="twitter:description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
   
     <link rel="alternative" href="/atom.xml" title="Shelly的博客" type="application/atom+xml">
   
@@ -141,36 +142,48 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-Autoprefixer前缀详解" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/02/Autoprefixer前缀详解/" class="archive-article-date">
-  	<time datetime="2018-04-02T13:07:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-02</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/02/Autoprefixer前缀详解/">Autoprefixer前缀详解</a>
+    <h1 class="article-title" itemprop="name">
+      Autoprefixer前缀详解
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/04/02/Autoprefixer前缀详解/" class="archive-article-date">
+  	<time datetime="2018-04-02T13:07:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近在写<a href="https://sydot.gitbooks.io/autoprefixer-prefixes/content/" target="_blank" rel="noopener">autoprefixer插件的prefixes详解</a>,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。</p>
+<p>在这里贴一下书写规则和示例代码~</p>
+<h2 id="书写规则"><a href="#书写规则" class="headerlink" title="书写规则"></a>书写规则</h2><p>本书遵循统一的书写规则，以源码（<a href="https://github.com/sydot/autoprefixer" target="_blank" rel="noopener">fork的分支</a>）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.out.css文件，并解析其对于传入的css规则的前缀处理。</p>
+<a id="more"></a>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>例如源码中的示例代码example.css,example.out.css就展示了Autoprefixer对于伪元素选择器<code>::placeholder</code>这条css规则的处理:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* example.css */</span></span><br><span class="line"><span class="selector-pseudo">::placeholder</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: gray;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* example.out.css */</span></span><br><span class="line"><span class="selector-pseudo">::-webkit-input-placeholder</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: gray;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">:-ms-input-placeholder</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: gray;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">::-ms-input-placeholder</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: gray;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-pseudo">::placeholder</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: gray;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对应的，在lib/hacks目录下就可以在placeholder.js看到处理过程:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// placeholder.js</span></span><br><span class="line"><span class="keyword">const</span> Selector = <span class="built_in">require</span>(<span class="string">'../selector'</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Placeholder</span> <span class="keyword">extends</span> <span class="title">Selector</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> names = [<span class="string">'::placeholder'</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Add old mozilla to possible prefixes</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">possible() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">super</span>.possible().concat([<span class="string">'-moz- old'</span>, <span class="string">'-ms- old'</span>]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Return different selectors depend on prefix</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">prefixed(prefix) &#123;</span><br><span class="line">    <span class="keyword">if</span> (prefix === <span class="string">'-webkit-'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'::-webkit-input-placeholder'</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (prefix === <span class="string">'-ms-'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'::-ms-input-placeholder'</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (prefix === <span class="string">'-ms- old'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">':-ms-input-placeholder'</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (prefix === <span class="string">'-moz- old'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">':-moz-placeholder'</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">`::<span class="subst">$&#123;prefix&#125;</span>placeholder`</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = Placeholder;</span><br></pre></td></tr></table></figure>
+<p>则处理规则为:</p>
+<ul>
+<li>Chrome/Safari/Opera &amp; IE使用前缀<code>::-webkit-input-</code>&amp; <code>::-ms-input-</code></li>
+<li>Firefox使用前缀<code>::-moz-</code></li>
+<li>老版本的IE &amp; Firefox只用一个冒号</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -194,219 +207,122 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://sydot.github.io/2018/04/02/Autoprefixer前缀详解/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/03/04/Autoprefixer解析/" class="archive-article-date">
-  	<time datetime="2018-03-04T05:51:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-04</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/04/Autoprefixer解析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Autoprefixer解析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/03/04/Autoprefixer解析/">Autoprefixer解析</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">autoprefixer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">plugin</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/25/postcss的插件解析/" class="archive-article-date">
-  	<time datetime="2018-02-25T14:00:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/25/postcss的插件解析/">postcss的插件解析</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">autoprefixer</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">plugin</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/16/postcss的AST解析/" class="archive-article-date">
-  	<time datetime="2018-02-16T08:56:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/16/postcss的AST解析/">postcss的AST解析</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">AST</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/02/08/从源码看postcss/" class="archive-article-date">
-  	<time datetime="2018-02-08T06:32:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-08</time>
-</a>
-        </div>
-    	 
+  <div id="gitment-ctn"></div> 
+<link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<script src="//imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  id: "https://sydot.github.io/2018/04/02/Autoprefixer前缀详解/",
+  owner: 'sydot',
+  repo: 'sydot.github.io',
+  oauth: {
+    client_id: '8a76110e01d6f90d4fb4',
+    client_secret: 'a93cbba4422fce3f6041918fabd8c3cf620eed92',
+  },
+})
+gitment.render('gitment-ctn')
+</script>
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/02/08/从源码看postcss/">从源码看postcss</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">css</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">postcss</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -429,9 +345,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

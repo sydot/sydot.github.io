@@ -9,13 +9,13 @@
   <title>Autoprefixer解析 | Shelly的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="在上篇文章postcss的插件解析中以Autoprefixer为例，介绍了postcss对于插件的处理流程。这次主要分析Autoprefixer的工作原理。 Autoprefixer是一个CSS文件的后处理程序，使用Can I Use的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下示例代码： 123:fullscreen a &amp;#123;    display: flex&amp;#125; 以上">
-<meta name="keywords" content="css,源码,autoprefixer,plugin">
+<meta name="keywords" content="css,autoprefixer,plugin,源码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Autoprefixer解析">
 <meta property="og:url" content="https://sydot.github.io/2018/03/04/Autoprefixer解析/index.html">
 <meta property="og:site_name" content="Shelly的博客">
 <meta property="og:description" content="在上篇文章postcss的插件解析中以Autoprefixer为例，介绍了postcss对于插件的处理流程。这次主要分析Autoprefixer的工作原理。 Autoprefixer是一个CSS文件的后处理程序，使用Can I Use的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下示例代码： 123:fullscreen a &amp;#123;    display: flex&amp;#125; 以上">
-<meta property="og:updated_time" content="2018-03-04T12:20:09.573Z">
+<meta property="og:updated_time" content="2018-04-02T13:08:22.941Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Autoprefixer解析">
 <meta name="twitter:description" content="在上篇文章postcss的插件解析中以Autoprefixer为例，介绍了postcss对于插件的处理流程。这次主要分析Autoprefixer的工作原理。 Autoprefixer是一个CSS文件的后处理程序，使用Can I Use的数据来自动添加浏览器前缀到CSS规则当中，首先来看一下示例代码： 123:fullscreen a &amp;#123;    display: flex&amp;#125; 以上">
@@ -171,8 +171,8 @@
 <a id="more"></a>
 <h2 id="整体分析"><a href="#整体分析" class="headerlink" title="整体分析"></a>整体分析</h2><p>Autoprefixer运行的主函数是autoprefixer.js中的plugin函数，代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">plugin = <span class="function"><span class="keyword">function</span>(<span class="params">css, result</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> prefixes, ref;</span><br><span class="line">  prefixes = loadPrefixes(&#123;</span><br><span class="line">    <span class="keyword">from</span>: (ref = css.source) != <span class="literal">null</span> ? ref.input.file : <span class="keyword">void</span> <span class="number">0</span>,</span><br><span class="line">    env: options.env</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 检测是否需要prefixes</span></span><br><span class="line">  timeCapsule(result, prefixes);</span><br><span class="line">  <span class="keyword">if</span> (options.remove !== <span class="literal">false</span>) &#123;</span><br><span class="line">    prefixes.processor.remove(css);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (options.add !== <span class="literal">false</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> prefixes.processor.add(css, result);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <p>在没有传入options选项，且Autoprefixer对css文件有加工的情况下，相当于如下代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">plugin = <span class="function"><span class="keyword">function</span>(<span class="params">css, result</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> prefixes, ref;</span><br><span class="line">  prefixes = loadPrefixes(&#123;</span><br><span class="line">    <span class="keyword">from</span>: css.source.input.file,</span><br><span class="line">    env: options.env</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 清除不需要的前缀</span></span><br><span class="line">  prefixes.processor.remove(css);</span><br><span class="line">  <span class="comment">// 增添需要的前缀</span></span><br><span class="line">  <span class="keyword">return</span> prefixes.processor.add(css, result);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
-<p>显然，这里的loadPrefixes函数创建了一个包含所有需要的浏览器前缀列表，以及在processor属性中用于加工AST树的各类回调函数的prefixes对象，随后调用该对象中的remove、add等函数对传入的css AST树进行处理。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">loadPrefixes = <span class="function"><span class="keyword">function</span>(<span class="params">opts</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> browsers, key, stats;</span><br><span class="line">  stats = options.stats;</span><br><span class="line">  <span class="comment">// 根据browserslist(https://github.com/ai/browserslist)获取的需要兼容的浏览器列表</span></span><br><span class="line">  browsers = <span class="keyword">new</span> Browsers(<span class="built_in">module</span>.exports.data.browsers, reqs, opts, stats);</span><br><span class="line">  <span class="comment">// 根据当前配置得到一个key值</span></span><br><span class="line">  key = browsers.selected.join(<span class="string">', '</span>) + <span class="built_in">JSON</span>.stringify(options);</span><br><span class="line">  <span class="comment">// 缓存该key值对应的prefixes对象</span></span><br><span class="line">  <span class="keyword">return</span> cache[key] || (cache[key] = <span class="keyword">new</span> Prefixes(<span class="built_in">module</span>.exports.data.prefixes, browsers, options));</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports.data = &#123;</span><br><span class="line">  browsers: <span class="built_in">require</span>(<span class="string">'caniuse-db/data.json'</span>).agents,</span><br><span class="line">  prefixes: <span class="built_in">require</span>(<span class="string">'../data/prefixes'</span>)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>显然，这里的loadPrefixes函数创建了一个包含所有需要的浏览器前缀列表，以及在processor属性中用于加工AST树的各类回调函数的prefixes对象，随后调用该对象中的remove、add等函数对传入的css AST树进行处理:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">loadPrefixes = <span class="function"><span class="keyword">function</span>(<span class="params">opts</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> browsers, key, stats;</span><br><span class="line">  <span class="comment">// 浏览器兼容的配置</span></span><br><span class="line">  stats = options.stats;</span><br><span class="line">  <span class="comment">// 根据browserslist(https://github.com/ai/browserslist)获取的需要兼容的浏览器列表</span></span><br><span class="line">  browsers = <span class="keyword">new</span> Browsers(<span class="built_in">module</span>.exports.data.browsers, reqs, opts, stats);</span><br><span class="line">  <span class="comment">// 根据当前配置得到一个key值</span></span><br><span class="line">  key = browsers.selected.join(<span class="string">', '</span>) + <span class="built_in">JSON</span>.stringify(options);</span><br><span class="line">  <span class="comment">// 缓存该key值对应的prefixes对象</span></span><br><span class="line">  <span class="keyword">return</span> cache[key] || (cache[key] = <span class="keyword">new</span> Prefixes(<span class="built_in">module</span>.exports.data.prefixes, browsers, options));</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports.data = &#123;</span><br><span class="line">  browsers: <span class="built_in">require</span>(<span class="string">'caniuse-db/data.json'</span>).agents,</span><br><span class="line">  prefixes: <span class="built_in">require</span>(<span class="string">'../data/prefixes'</span>)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <h2 id="获取前缀"><a href="#获取前缀" class="headerlink" title="获取前缀"></a>获取前缀</h2><p>首先来看传入Prefixes函数中的第一个参数，即<code>require(&#39;../data/prefixes&#39;)</code>,该函数会返回一个result对象，存储每个css名称对应的prefixes列表，这里以<code>:fullscreen</code>为例介绍其流程：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// prefixes.js</span></span><br><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  fullscreen = <span class="built_in">require</span>(<span class="string">'caniuse-db/features-json/fullscreen.json'</span>);</span><br><span class="line"></span><br><span class="line">  feature(fullscreen, <span class="function"><span class="keyword">function</span>(<span class="params">browsers</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> prefix(<span class="string">':fullscreen'</span>, &#123;</span><br><span class="line">      selector: <span class="literal">true</span>,</span><br><span class="line">      browsers: browsers,</span><br><span class="line">      feature: <span class="string">'fullscreen'</span></span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  feature = <span class="function"><span class="keyword">function</span>(<span class="params">data, opts, callback</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> browser, match, need, ref, ref1, support, version, versions;</span><br><span class="line">    <span class="keyword">if</span> (!callback) &#123;</span><br><span class="line">      <span class="comment">// callback = opts, opts = &#123;&#125;</span></span><br><span class="line">      ref = [opts, &#123;&#125;], callback = ref[<span class="number">0</span>], opts = ref[<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    match = opts.match || <span class="regexp">/\sx($|\s)/</span>;</span><br><span class="line">    need = [];</span><br><span class="line">    ref1 = data.stats;</span><br><span class="line">    <span class="keyword">for</span> (browser <span class="keyword">in</span> ref1) &#123;</span><br><span class="line">      versions = ref1[browser];</span><br><span class="line">      <span class="keyword">for</span> (version <span class="keyword">in</span> versions) &#123;</span><br><span class="line">        support = versions[version];</span><br><span class="line">        <span class="keyword">if</span> (support.match(match)) &#123;</span><br><span class="line">          <span class="comment">// 例如"ie 11"</span></span><br><span class="line">          need.push(browser + <span class="string">' '</span> + version);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> callback(sort(need));</span><br><span class="line">  &#125;;</span><br><span class="line">  ...</span><br><span class="line">&#125;).call(<span class="keyword">this</span>);</span><br></pre></td></tr></table></figure>
 <p>其中<code>require(&#39;caniuse-db/features-json/fullscreen.json&#39;)</code>请求的就是针对<code>:fullscreen</code>的caniuse参数，其stats属性包含了所有浏览器版本中对<code>:fullscreen</code>的支持情况：</p>
@@ -206,15 +206,15 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">autoprefixer</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">plugin</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">源码</a>
         		</li>
       		
 		</ul>
@@ -283,6 +283,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2018/04/02/Autoprefixer前缀详解/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Autoprefixer前缀详解
+        
+      </div>
+    </a>
   
   
     <a href="/2018/02/25/postcss的插件解析/" id="article-nav-older" class="article-nav-link-wrap">
@@ -424,6 +433,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">css</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">autoprefixer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">plugin</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">源码</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
               </li>
              
@@ -436,23 +461,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">css</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">AST</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">源码</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">autoprefixer</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">plugin</a>
+                <a href="javascript:void(0)" class="js-tag color5">book</a>
               </li>
              
               <li class="article-tag-list-item">
