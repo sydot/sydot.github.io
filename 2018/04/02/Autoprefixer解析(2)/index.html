@@ -6,18 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://sydot.github.io">
-  <title>Autoprefixer前缀详解 | Shelly的博客</title>
+  <title>Autoprefixer解析(2) | Shelly的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
 <meta name="keywords" content="autoprefixer,css,book,源码">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Autoprefixer前缀详解">
-<meta property="og:url" content="https://sydot.github.io/2018/04/02/Autoprefixer详解/index.html">
+<meta property="og:title" content="Autoprefixer解析(2)">
+<meta property="og:url" content="https://sydot.github.io/2018/04/02/Autoprefixer解析(2)/index.html">
 <meta property="og:site_name" content="Shelly的博客">
 <meta property="og:description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
-<meta property="og:updated_time" content="2018-04-02T13:16:35.562Z">
+<meta property="og:updated_time" content="2018-04-03T09:10:14.947Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Autoprefixer前缀详解">
+<meta name="twitter:title" content="Autoprefixer解析(2)">
 <meta name="twitter:description" content="最近在写autoprefixer插件的prefixes详解,详细分析了Autoprefixer对于特殊css规则的前缀处理，并且对于浏览器前缀的特殊规则及处理有了一个大体的认识，感兴趣的话可以mark。 在这里贴一下书写规则和示例代码~ 书写规则本书遵循统一的书写规则，以源码（fork的分支）目录下lib/hacks中的单个js文件为一页，对照查看test/cases中的xxx.css,xxx.o">
   
     <link rel="alternative" href="/atom.xml" title="Shelly的博客" type="application/atom+xml">
@@ -142,19 +142,19 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-Autoprefixer详解" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Autoprefixer解析(2)" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Autoprefixer前缀详解
+      Autoprefixer解析(2)
     </h1>
   
 
         
-        <a href="/2018/04/02/Autoprefixer详解/" class="archive-article-date">
+        <a href="/2018/04/02/Autoprefixer解析(2)/" class="archive-article-date">
   	<time datetime="2018-04-02T13:07:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-02</time>
 </a>
         
@@ -257,7 +257,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://sydot.github.io/2018/04/02/Autoprefixer详解/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://sydot.github.io/2018/04/02/Autoprefixer解析(2)/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -312,7 +312,7 @@
 <script src="//imsun.github.io/gitment/dist/gitment.browser.js"></script>
 <script>
 var gitment = new Gitment({
-  id: "https://sydot.github.io/2018/04/02/Autoprefixer详解/",
+  id: "https://sydot.github.io/2018/04/02/Autoprefixer解析(2)/",
   owner: 'sydot',
   repo: 'sydot.github.io',
   oauth: {
@@ -411,6 +411,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">autoprefixer</a>
               </li>
              
@@ -431,15 +439,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Puppeteer</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">爬虫</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">postcss</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">AST</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -456,10 +460,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">Webpack</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">AST</a>
               </li>
             
             <div class="clearfix"></div>
